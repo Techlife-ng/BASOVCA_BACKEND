@@ -6,13 +6,14 @@ const cloudStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: "youngTech/blog1",
-    format: "png", // supports promises as well
+    format: async (req, file) => "png", // forces png format
     public_id: (req, file) => {
       console.log(file);
       return file.originalname;
     },
   },
 });
+
 
 var storage = multer.diskStorage({
   destination: (req, file, cb) => {

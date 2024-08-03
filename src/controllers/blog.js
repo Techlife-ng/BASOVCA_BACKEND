@@ -1,4 +1,4 @@
-const db = require("../models");
+import db from "../models";
 const cloudinary = require("cloudinary");
 
 cloudinary.config({
@@ -7,23 +7,27 @@ cloudinary.config({
   api_secret: process.env.CLOUDIARYSECRETKEY,
 });
 
-module.exports.blog = (req, res) => {
-  console.log(req.body);
+const blog = (req, res) => {
+  // console.log(req.body,"KSKKS")
   const {
+    id = null,
+    title = null,
+    content = null,
+    attechment = null,
+    doc_type = "normal",
     query_type = "insert",
-    id = "",
-    title = "",
-    content = "",
-    attechment = "",
-  } = req.body;
+    created_at= null
+  } = req.body.newForm;
   db.sequelize
-    .query(`call blog(:query_type,:id,:title,:content,:attechment)`, {
+    .query(`call blog(:query_type,:id,:title,:content,:attechment,:doc_type,:created_at)`, {
       replacements: {
         query_type,
         id,
         title,
         content,
         attechment,
+        doc_type,
+        created_at
       },
     })
     .then((resp) => res.status(200).json({ success: true, resp }))
@@ -33,83 +37,8 @@ module.exports.blog = (req, res) => {
     });
 };
 
-module.exports.get_blog = (req, res) => {
-  const {
-    id = "",
-    query_type = "select",
-    title = "",
-    content = "",
-    attechment = "",
-  } = req.query;
-  console.log({ Q: req.query });
-  db.sequelize
-    .query(`call blog(:query_type,:id,:title,:content,:attechment)`, {
-      replacements: {
-        id: isNaN(parseInt(id)) ? null : parseInt(id),
-        query_type,
-        title,
-        content,
-        attechment,
-      },
-    })
-    .then((resp) => res.status(200).json({ success: true, data: resp }))
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ success: false });
-    });
-};
-module.exports.delete_blog = (req, res) => {
-  const {} = req.body;
-  const {
-    id = "",
-    query_type = "delete",
-    title = "",
-    content = "",
-    attechment = "",
-  } = req.body;
-  db.sequelize
-    .query(`call blog(:query_type,:id,:title,:content,:attechment)`, {
-      replacements: {
-        id,
-        query_type,
-        title,
-        content,
-        attechment,
-      },
-    })
-    .then((resp) => res.status(200).json({ success: true, data: resp }))
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ success: false });
-    });
-};
-module.exports.postAttachments = (req, res) => {
-  const attachment = req.body.media; // Assuming req.body.media is a single file
-  console.log({ attachment, cloud: cloudinary.config().cloud_name });
-  // Upload the file to Cloudinary
-  uploadToCloudinary(attachment)
-    .then((result) => {
-      // Upload to Cloudinary is successful
-      // Send response with success status and attachment URL
-      res.json({ success: true, attachment: result.secure_url });
-    })
-    .catch((error) => {
-      // Error occurred during file upload to Cloudinary
-      console.error("Error uploading to Cloudinary:", error);
-      res
-        .status(500)
-        .json({ success: false, error: "Error uploading to Cloudinary" });
-    });
-};
-// Function to upload a file to Cloudinary
-const uploadToCloudinary = (file) => {
-  return new Promise((resolve, reject) => {
-    cloudinary.uploader.upload(file.path, (result) => {
-      if (result.secure_url) {
-        resolve(result);
-      } else {
-        reject("Upload to Cloudinary failed");
-      }
-    });
-  });
-};
+
+
+export {
+  blog
+}
