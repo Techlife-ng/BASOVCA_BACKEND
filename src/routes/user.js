@@ -1,32 +1,29 @@
-import passport from "passport";
-import config from "../config/config";
-import { allowOnly } from "../services/routesHelper";
-import {
+const passport = require("passport");
+const config = require("../config/config");
+const { allowOnly } = require("../services/routesHelper");
+const {
   create,
   login,
   findAllUsers,
   findById,
   update,
   deleteUser,
-  verifyToken,
-} from "../controllers/user";
-import { imageUpload } from "../config/multer";
-import { blog } from "../controllers/blog";
+} = require("../controllers/user");
 
 module.exports = (app) => {
   // create a new user
   app.post(
-    "/api/users/create",
+    "/users/create",
     passport.authenticate("jwt", { session: false }),
-    create
+    allowOnly(config.accessLevels.admin, create)
   );
 
   // user login
-  app.post("/api/users/login", login);
+  app.post("/users/login", login);
 
   //retrieve all users
   app.get(
-    "/api/users",
+    "/users",
     passport.authenticate("jwt", {
       session: false,
     }),
@@ -35,7 +32,7 @@ module.exports = (app) => {
 
   // retrieve user by id
   app.get(
-    "/api/users/:userId",
+    "/users/:userId",
     passport.authenticate("jwt", {
       session: false,
     }),
@@ -44,7 +41,7 @@ module.exports = (app) => {
 
   // update a user with id
   app.put(
-    "/api/users/:userId",
+    "/users/:userId",
     passport.authenticate("jwt", {
       session: false,
     }),
@@ -53,23 +50,10 @@ module.exports = (app) => {
 
   // delete a user
   app.delete(
-    "/api/users/:userId",
+    "/users/:userId",
     passport.authenticate("jwt", {
       session: false,
     }),
     allowOnly(config.accessLevels.admin, deleteUser)
   );
-  app.get("/verify-token", verifyToken);
-  app.post("/blog", blog);
-  app.post("/blog-pictures", imageUpload.single("media"), (req, res) => {
-    // console.log("FILE", req.file);
-    if (!req.file) {
-      return res
-        .status(400)
-        .json({ success: false, error: "No file uploaded" });
-    }
-
-    // The file is already uploaded to Cloudinary by the time this callback is invoked
-    res.json({ success: true, url: req.file.path });
-  });
 };

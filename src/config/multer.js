@@ -1,29 +1,21 @@
-const cloudinary = require("cloudinary").v2;
-const { CloudinaryStorage } = require("multer-storage-cloudinary");
-const multer = require("multer");
+require("dotenv").config();
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const multer = require('multer');
 
-const cloudStorage = new CloudinaryStorage({
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_KEY,
+    api_secret: process.env.CLOUDINARY_SECRET
+});
+
+const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: "youngTech/blog1",
-    format: async (req, file) => "png", // forces png format
-    public_id: (req, file) => {
-      console.log(file);
-      return file.originalname;
-    },
-  },
+  folder: "youngTech/blog1",
+  allowedFormats: ["jpg", "png", "jpeg", "gif", "mp4", "ogg", "3gp"],
+  transformation: [{ width: 500, height: 500, crop: "limit" }],
 });
 
-var storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "src/uploads");
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + "-" + file.originalname);
-  },
-});
+const parser = multer({ storage: storage });
 
-module.exports = {
-  upload: multer({ storage }),
-  imageUpload: multer({ storage: cloudStorage }),
-};
+module.exports = parser;

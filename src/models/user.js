@@ -1,6 +1,6 @@
-export default (sequelize, DataTypes) => {
+module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define(
-    'User',
+    'user',
     {
       fullname: DataTypes.STRING,
       username: DataTypes.STRING,
@@ -8,8 +8,15 @@ export default (sequelize, DataTypes) => {
       password: DataTypes.STRING,
       role: DataTypes.STRING,
     },
-    {}
+    {
+      tableName: 'users',
+      table_name: 'users',
+    }
   );
+
+  User.associate = function (models) {
+    // associations go here
+  };
 
   return User;
 };
