@@ -11,7 +11,7 @@ cloudinary.config({
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  folder: "youngTech/blog1",
+  folder: "youngTech/blog2",
   allowedFormats: ["jpg", "png", "jpeg", "gif", "mp4", "ogg", "3gp"],
   transformation: [{ width: 500, height: 500, crop: "limit" }],
 });

@@ -1,3 +1,4 @@
+const parser = require("../config/multer");
 const { blog } = require("../controllers/blog");
 const cloudinary = require("cloudinary").v2;
 const multer = require("multer");
@@ -8,9 +9,7 @@ cloudinary.config({
   api_key: "437383159175644",
   api_secret: "_dim6imoS_SCIgc915dy8aud-Ns",
 });
-// Set up multer storage and upload
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = parser;
 
 module.exports = (app) => {
   app.post("/blog", blog);
