@@ -1,19 +1,23 @@
+// multer.js
+
 require("dotenv").config();
-const cloudinary = require('cloudinary').v2;
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
-const multer = require('multer');
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
+const multer = require("multer");
 
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_NAME,
-    api_key: process.env.CLOUDINARY_KEY,
-    api_secret: process.env.CLOUDINARY_SECRET
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET,
 });
 
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  folder: "youngTech/blog2",
-  allowedFormats: ["jpg", "png", "jpeg", "gif", "mp4", "ogg", "3gp"],
-  transformation: [{ width: 500, height: 500, crop: "limit" }],
+  params: {
+    folder: "youngTech/blog1",
+    allowedFormats: ["jpg", "png", "jpeg", "gif", "mp4", "ogg", "3gp"],
+    transformation: [{ width: 500, height: 500, crop: "limit" }],
+  },
 });
 
 const parser = multer({ storage: storage });
