@@ -8,36 +8,36 @@ cloudinary.config({
 });
 
 module.exports.blog = (req, res) => {
-   const {
-     id = null,
-     title = null,
-     content = null,
-     attechment = null,
-     doc_type = "normal",
-     query_type = "insert",
-     created_at = null,
-   } = req.body.newForm;
+  const {
+    id = null,
+    title = null,
+    content = null,
+    attechment = null,
+    doc_type = "normal",
+    query_type = "select",
+    created_at = null,
+  } = req.body.newForm;
   //  console.log(req.body.newForm);
-   db.sequelize
-     .query(
-       `call blog(:query_type,:id,:title,:content,:attechment,:doc_type,:created_at)`,
-       {
-         replacements: {
-           query_type,
-           id,
-           title,
-           content,
-           attechment,
-           doc_type,
-           created_at,
-         },
-       }
-     )
-     .then((resp) => res.status(200).json({ success: true, resp }))
-     .catch((err) => {
-       console.log(err);
-       res.status(500).json({ success: false });
-     });
+  db.sequelize
+    .query(
+      `call blog(:query_type,:id,:title,:content,:attechment,:doc_type,:created_at)`,
+      {
+        replacements: {
+          query_type,
+          id,
+          title,
+          content,
+          attechment,
+          doc_type,
+          created_at,
+        },
+      }
+    )
+    .then((resp) => res.status(200).json({ success: true, resp }))
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ success: false });
+    });
 };
 
 module.exports.postAttachments = (req, res) => {
@@ -69,4 +69,64 @@ const uploadToCloudinary = (file) => {
       }
     });
   });
+};
+
+module.exports.media = (req, res) => {
+  const {
+    title = null,
+    url = null,
+    image_url = null,
+    type = "music",
+    duration = "",
+    description = "",
+  } = req.body.newForm;
+  const { query_type = "select" } = req.query;
+  db.sequelize
+    .query(
+      `call media(:query_type,:title,:type,:image_url,:url,:duration,:description)`,
+      {
+        replacements: {
+          query_type,
+          url,
+          title,
+          type,
+          image_url,
+          duration,
+          description,
+        },
+      }
+    )
+    .then((resp) => res.status(200).json({ success: true, resp }))
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ success: false });
+    });
+};
+
+module.exports.profile = (req, res) => {
+  const {
+    description = "",
+    full_name = "",
+    image_url = "",
+    title = "",
+  } = req.body.newForm;
+  const { query_type = "select" } = req.query;
+  db.sequelize
+    .query(
+      `call profile(:query_type,:full_name,:description,:title,:image_url)`,
+      {
+        replacements: {
+          query_type,
+          full_name,
+          title,
+          image_url,
+          description,
+        },
+      }
+    )
+    .then((resp) => res.status(200).json({ success: true, resp }))
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ success: false });
+    });
 };

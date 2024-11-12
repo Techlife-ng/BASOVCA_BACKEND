@@ -1,6 +1,6 @@
 // blog.js
 
-const { blog } = require("../controllers/blog");
+const { blog, media, profile } = require("../controllers/blog");
 const parser = require("../config/multer");
 
 module.exports = (app) => {
@@ -15,4 +15,6 @@ module.exports = (app) => {
     // The file is already uploaded to Cloudinary via the parser middleware
     res.json({ success: true, url: req.file.path });
   });
+  app.post("/media", media);
+  app.post("/profile", profile);
 };
