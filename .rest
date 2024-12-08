@@ -1,0 +1,16 @@
+# POST http://localhost:43439/users/login
+# Content-Type: application/json
+
+# {
+#     "email": "yusuf@admin.com",
+#     "password": "123456"
+# }
+
+
+POST https://server.bitcoops.com/basovca/users/login
+Content-Type: application/json
+
+{
+    "email": "yusuf@admin.com",
+    "password": "123456"
+}
