@@ -17,7 +17,7 @@ module.exports.blog = (req, res) => {
     query_type = "select",
     created_at = null,
   } = req.body.newForm;
-  //  console.log(req.body.newForm);
+   console.log(req.body.newForm);
   db.sequelize
     .query(
       `call blog(:query_type,:id,:title,:content,:attechment,:doc_type,:created_at)`,
