@@ -83,7 +83,7 @@ module.exports.media = (req, res) => {
   const { query_type = "select" } = req.query;
   db.sequelize
     .query(
-      `call media(:query_type,:title,:type,:image_url,:url,:duration,:description)`,
+      `call media(:query_type,:title,:type,:image_url,:url,:description,:duration)`,
       {
         replacements: {
           query_type,
