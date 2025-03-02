@@ -31,7 +31,7 @@ app.use(passport.initialize());
 require("./config/passport")(passport);
 
 //default route
-app.get("/", (req, res) => res.send("Hello my World"));
+app.get("/", (req, res) => res.send("Kano server"));
 
 require("./routes/user.js")(app);
 require("./routes/blog.js")(app);

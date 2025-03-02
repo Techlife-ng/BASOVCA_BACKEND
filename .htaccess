@@ -1,0 +1,8 @@
+RewriteEngine On
+RewriteRule ^$ http://127.0.0.1:45338/ [P,L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ http://127.0.0.1:45338/$1 [P,L]
+<IfModule mime_module>
+  AddHandler application/x-httpd-ea-php56 .php .php5 .phtml
+</IfModule>
