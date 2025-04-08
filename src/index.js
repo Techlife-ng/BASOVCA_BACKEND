@@ -3,18 +3,24 @@ const passport = require("passport");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const models = require("./models");
+const path = require("path");
+const fs = require("fs");
 
 const app = express();
 
 app.use(bodyParser.json());
 
-let port = process.env.PORT || 43439;
-
+let port = process.env.PORT || 42223;
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir);
+}
 // set the view engine to ejs
 app.set("view engine", "ejs");
 
 // make express look in the public directory for assets (css/js/img)
 app.use(express.static(__dirname + "/public"));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(cors());
 

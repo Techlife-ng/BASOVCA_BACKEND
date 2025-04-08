@@ -15,7 +15,7 @@ module.exports = (app) => {
   app.post(
     "/users/create",
     passport.authenticate("jwt", { session: false }),
-    allowOnly(config.accessLevels.admin, create)
+    create
   );
 
   // user login

@@ -11,7 +11,7 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_SECRET,
 });
 
-const storage = new CloudinaryStorage({
+const storages = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
     folder: "youngTech/blog1",
@@ -20,6 +20,21 @@ const storage = new CloudinaryStorage({
   },
 });
 
-const parser = multer({ storage: storage });
+const parser = multer({ storage: storages });
 
-module.exports = parser;
+
+
+
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); // Ensure the 'uploads' folder exists
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${uuidv4()}_${Date.now()}${path.extname(file.originalname)}`);
+  },
+});
+
+// Multer middleware for multiple file uploads
+const upload = multer({ storage: storage }) // 'files' is the field name and 10 is the max number of files
+module.exports = upload;

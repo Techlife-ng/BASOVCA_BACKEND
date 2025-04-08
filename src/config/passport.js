@@ -13,14 +13,14 @@ opts.secretOrKey = 'secret';
 module.exports = passport => {
   passport.use(
     new Strategy(opts, (jwt_payload, done) => {
-      Users.findAll({ where: { id: jwt_payload.id } })
-        .then(user => {
+      Users.findOne({ where: { username: jwt_payload.username } })
+        .then((user) => {
           if (user.length) {
             return done(null, user);
           }
           return done(null, false);
         })
-        .catch(err => console.log(err));
+        .catch((err) => console.log(err));
     })
   );
 };
