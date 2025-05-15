@@ -1,6 +1,6 @@
 const passport = require("passport");
-const config = require("../config/config");
-const { allowOnly } = require("../services/routesHelper");
+// const config = require("../config/config");
+// const { allowOnly } = require("../services/routesHelper");
 const {
   create,
   login,
@@ -8,26 +8,23 @@ const {
   findById,
   update,
   deleteUser,
+  verifyUserToken,
 } = require("../controllers/user");
 
 module.exports = (app) => {
   // create a new user
-  app.post(
-    "/users/create",
-    passport.authenticate("jwt", { session: false }),
-    create
-  );
+  app.post("/users/create", create);
 
   // user login
   app.post("/users/login", login);
 
   //retrieve all users
   app.get(
-    "/users",
-    passport.authenticate("jwt", {
-      session: false,
-    }),
-    allowOnly(config.accessLevels.admin, findAllUsers)
+    "/users_all",
+    // passport.authenticate("jwt", {
+    //   session: false,
+    // }),
+    findAllUsers
   );
 
   // retrieve user by id
@@ -36,7 +33,7 @@ module.exports = (app) => {
     passport.authenticate("jwt", {
       session: false,
     }),
-    allowOnly(config.accessLevels.admin, findById)
+    findById
   );
 
   // update a user with id
@@ -45,7 +42,7 @@ module.exports = (app) => {
     passport.authenticate("jwt", {
       session: false,
     }),
-    allowOnly(config.accessLevels.user, update)
+    update
   );
 
   // delete a user
@@ -54,6 +51,13 @@ module.exports = (app) => {
     passport.authenticate("jwt", {
       session: false,
     }),
-    allowOnly(config.accessLevels.admin, deleteUser)
+    deleteUser
+  );
+  app.get(
+    "/verify-token",
+    passport.authenticate("jwt", {
+      session: false,
+    }),
+    verifyUserToken
   );
 };

@@ -1,5 +1,7 @@
 const db = require("../models");
 const cloudinary = require("cloudinary");
+const moment = require("moment");
+const { v4: uuidv4 } = require("uuid");
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
@@ -17,7 +19,7 @@ module.exports.blog = (req, res) => {
     query_type = "select",
     created_at = null,
   } = req.body.newForm;
-   console.log(req.body.newForm);
+  console.log(req.body.newForm);
   db.sequelize
     .query(
       `call blog(:query_type,:id,:title,:content,:attechment,:doc_type,:created_at)`,
@@ -129,4 +131,104 @@ module.exports.profile = (req, res) => {
       console.log(err);
       res.status(500).json({ success: false });
     });
+};
+
+module.exports.insertDocument = async (req, res) => {
+  // Validate request
+  if (!req.files || !req.files.document) {
+    return res.status(400).json({ message: "No document file uploaded" });
+  }
+
+  // Parse form data with defaults
+  const formData = req.body.form ? JSON.parse(req.body.form) : {};
+  const {
+    docType = null,
+    remark = null, // Using null instead of empty string for database
+    user_id = null,
+    department = null,
+  } = formData;
+  const req_id = uuidv4();
+  // Get uploaded files (handles single file or array)
+  const documents = Array.isArray(req.files.document)
+    ? req.files.document
+    : [req.files.document];
+
+  try {
+    // Process each uploaded file
+    for (const file of documents) {
+      await db.sequelize.query(
+        `INSERT INTO document(doc_url, doc_type, remark, user_id, department, req_id) 
+         VALUES (:doc_url, :doc_type, :remark, :user_id, :department, :req_id)`,
+        {
+          replacements: {
+            doc_url: file.path.replace("src/", ""),
+            doc_type: docType || null,
+            remark: remark || null,
+            user_id: user_id || null,
+            department: department || null,
+            req_id: req_id || null,
+          },
+          type: db.sequelize.QueryTypes.INSERT,
+        }
+      );
+    }
+
+    res.status(201).json({ message: "Document(s) inserted successfully" });
+  } catch (error) {
+    console.error("Error inserting document:", error);
+    res.status(500).json({
+      message: "Error inserting document",
+      error: process.env.NODE_ENV === "development" ? error.message : null,
+    });
+  }
+};
+
+module.exports.selectDoc = (req, res) => {
+  const today = moment().format("YYYY-MM-DD");
+  const monthAgo = moment(today).subtract(5, "months").format("YYYY-MM-DD");
+  const {
+    query_type = "by_department",
+    from = monthAgo,
+    to = today,
+    department = null,
+  } = req.query;
+  db.sequelize
+    .query(`call document(:from, :to, :department, :query_type)`, {
+      replacements: {
+        from,
+        to,
+        department,
+        query_type,
+      },
+    })
+    .then((resp) => res.status(200).json({ success: true, data: resp }))
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ success: false });
+    });
+};
+
+module.exports.getDocuments = async (req, res) => {
+  const { department, req_id } = req.query;
+
+  if (!department) {
+    return res.status(400).json({ message: "Department is required" });
+  }
+
+  try {
+    const documents = await db.sequelize.query(
+      `SELECT * FROM document WHERE department = :department and req_id = :req_id`,
+      {
+        replacements: { department, req_id },
+        type: db.sequelize.QueryTypes.SELECT,
+      }
+    );
+    res.status(200).json({ success: true, documents });
+  } catch (error) {
+    console.error("Error fetching documents:", error);
+    res.status(500).json({
+      message: "Error fetching documents",
+      error: process.env.NODE_ENV === "development" ? error.message : null,
+    });
+  }
 };

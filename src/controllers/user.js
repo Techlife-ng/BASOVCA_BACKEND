@@ -1,6 +1,8 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
 
+dotenv.config();
 const models = require("../models");
 const User = models.user;
 
@@ -25,7 +27,8 @@ const create = (req, res) => {
     return res.status(400).json(errors);
   }
 
-  User.findOne({ where: { username } }).then((user) => {
+  User.findAll({ where: { username } }).then((user) => {
+    // console.log(user, req.body);
     if (user.length) {
       return res.status(400).json({ username: "Username already exists!" });
     } else {
@@ -43,7 +46,7 @@ const create = (req, res) => {
           newUser.password = hash;
           User.create(newUser)
             .then((user) => {
-              res.json({ user });
+              res.json({ user, success: true });
             })
             .catch((err) => {
               res.status(500).json({ err });
@@ -63,13 +66,13 @@ const login = (req, res) => {
   }
 
   const { username, password } = req.body;
-
-  User.findOne({
+  User.findAll({
     where: {
       username,
     },
   })
     .then((user) => {
+      // console.log(req.body, "LLSLSLS", user);
       //check for user
       if (!user.length) {
         errors.username = "User not found!";
@@ -85,15 +88,14 @@ const login = (req, res) => {
           if (isMatch) {
             // user matched
             console.log("matched!");
-            const { id, username } = user[0].dataValues;
-            const payload = { id, username }; //jwt payload
-            // console.log(payload)
+            const { id } = user[0].dataValues;
+            const payload = { id }; //jwt payload
 
             jwt.sign(
               payload,
-              "secret",
+              process.env.JWT_SECRET_KEY,
               {
-                expiresIn: 3600,
+                expiresIn: 9600,
               },
               (err, token) => {
                 res.json({
@@ -102,6 +104,7 @@ const login = (req, res) => {
                   role: user[0].dataValues.role,
                   user: user[0].dataValues,
                 });
+                console.log(err, 't-error')
               }
             );
           } else {
@@ -111,12 +114,19 @@ const login = (req, res) => {
         })
         .catch((err) => console.log(err));
     })
-    .catch((err) => res.status(500).json({ err }));
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ err });
+    });
 };
 
 // fetch all users
 const findAllUsers = (req, res) => {
-  return null;
+  User.findAll()
+    .then((user) => {
+      res.json({ success: true, user });
+    })
+    .catch((err) => res.status(500).json({ err }));
 };
 
 // fetch user by userId
@@ -159,51 +169,85 @@ const deleteUser = (req, res) => {
     .catch((err) => res.status(500).json({ msg: "Failed to delete!" }));
 };
 
-const verifyAuth = (req, res, next) => {
+// const verifyAuth = (req, res, next) => {
+//   const authToken = req.headers["authorization"];
+
+//   // Check if auth token exists and is correctly formatted
+//   if (!authToken || !authToken.startsWith("Bearer ")) {
+//     return res.status(401).json({
+//       success: false,
+//       msg: "No token provided or invalid token format.",
+//     });
+//   }
+
+//   const token = authToken.split(" ")[1];
+
+//   jwt.verify(token, process.env.JWT_SECRET_KEY, (error, decoded) => {
+//     if (error) {
+//       return res.status(401).json({
+//         success: false,
+//         msg: "Failed to authenticate token.",
+//         error: error.message,
+//       });
+//     }
+
+//     const { id } = decoded;
+
+//     User.findOne({ where: { id } })
+//       .then((user) => {
+//         if (!user) {
+//           return res.status(404).json({
+//             success: false,
+//             msg: "User not found.",
+//           });
+//         } else {
+//           return res.json({
+//             success: true,
+//             user,
+//           });
+//         }
+//       })
+//       .catch((error) => {
+//         console.error("Database Error:", error);
+//         return res.status(500).json({
+//           success: false,
+//           msg: "An error occurred.",
+//           error: error.message,
+//         });
+//       });
+//   });
+// };
+
+const verifyUserToken = (req, res) => {
   const authToken = req.headers["authorization"];
-
-  // Check if auth token exists and is correctly formatted
-  if (!authToken || !authToken.startsWith("Bearer ")) {
-    return res.status(401).json({
-      success: false,
-      msg: "No token provided or invalid token format.",
-    });
-  }
-
   const token = authToken.split(" ")[1];
-
   jwt.verify(token, process.env.JWT_SECRET_KEY, (error, decoded) => {
     if (error) {
-      return res.status(401).json({
+      // console.log(error, "ERRRRRRROR");
+      return res.json({
         success: false,
-        msg: "Failed to authenticate token.",
-        error: error.message,
+        msg: "Failed to authenticate token." + error,
       });
     }
-
-    const { username } = decoded;
-
-    User.findOne({ where: { username } })
+    const { id } = decoded;
+    console.log(decoded, "IDDDDDDDDDDD");
+    User.findOne({ where: { id } })
       .then((user) => {
-        if (!user) {
-          return res.status(404).json({
-            success: false,
-            msg: "User not found.",
-          });
-        } else {
-          return res.json({
+        if (user) {
+          console.log(user, "USER");
+          res.json({
             success: true,
-            user,
+            user: user,
+            token: authToken,
           });
+          // next();
+        } else {
+          res.status(404).json({ success: false, msg: "User not found" });
         }
       })
       .catch((error) => {
-        console.error("Database Error:", error);
-        return res.status(500).json({
-          success: false,
-          msg: "An error occurred.",
-          error: error.message,
-        });
+        console.log({ error });
+        res.status(500).json({ success: false, error });
       });
   });
 };
@@ -215,5 +259,6 @@ module.exports = {
   findById,
   update,
   deleteUser,
-  verifyAuth,
+  // verifyAuth,
+  verifyUserToken,
 };
