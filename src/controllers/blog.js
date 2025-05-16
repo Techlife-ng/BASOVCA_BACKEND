@@ -209,21 +209,17 @@ module.exports.selectDoc = (req, res) => {
 };
 
 module.exports.getDocuments = async (req, res) => {
-  const { department, req_id } = req.query;
-
-  if (!department) {
-    return res.status(400).json({ message: "Department is required" });
-  }
+  const { req_id } = req.query;
 
   try {
     const documents = await db.sequelize.query(
-      `SELECT * FROM document WHERE department = :department and req_id = :req_id`,
+      `SELECT * FROM document WHERE req_id = :req_id`,
       {
-        replacements: { department, req_id },
+        replacements: { req_id },
         type: db.sequelize.QueryTypes.SELECT,
       }
     );
-    res.status(200).json({ success: true, documents });
+    res.status(200).json({ success: true, data:documents });
   } catch (error) {
     console.error("Error fetching documents:", error);
     res.status(500).json({

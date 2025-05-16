@@ -20,7 +20,10 @@ app.set("view engine", "ejs");
 
 // make express look in the public directory for assets (css/js/img)
 app.use(express.static(__dirname + "/public"));
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use(
+  "/uploads",
+  require("express").static(path.join(__dirname, "..", "uploads"))
+);
 
 app.use(cors());
 
@@ -41,6 +44,7 @@ app.get("/", (req, res) => res.send("Kano server"));
 
 require("./routes/user.js")(app);
 require("./routes/blog.js")(app);
+
 
 //create a server
 var server = app.listen(port, function () {
