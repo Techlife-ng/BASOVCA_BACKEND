@@ -50,6 +50,7 @@ const create = (req, res) => {
             })
             .catch((err) => {
               res.status(500).json({ err });
+              console.log(err);
             });
         });
       });
@@ -104,7 +105,7 @@ const login = (req, res) => {
                   role: user[0].dataValues.role,
                   user: user[0].dataValues,
                 });
-                console.log(err, 't-error')
+                console.log(err, "t-error");
               }
             );
           } else {
