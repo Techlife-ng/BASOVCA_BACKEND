@@ -231,11 +231,11 @@ const verifyUserToken = (req, res) => {
       });
     }
     const { id } = decoded;
-    console.log(decoded, "IDDDDDDDDDDD");
+    // console.log(decoded, "IDDDDDDDDDDD");
     User.findOne({ where: { id } })
       .then((user) => {
         if (user) {
-          console.log(user, "USER");
+          // console.log(user, "USER");
           res.json({
             success: true,
             user: user,

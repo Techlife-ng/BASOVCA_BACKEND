@@ -17,7 +17,7 @@ module.exports = (passport) => {
       Users.findOne({ where: { id: jwt_payload.id } })
         .then((user) => {
           if (user) {
-            console.log(user.dataValues);
+            // console.log(user.dataValues);
             return done(null, user.dataValues);
           }
           return done(null, false);
